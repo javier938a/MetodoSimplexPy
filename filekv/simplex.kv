@@ -1,0 +1,114 @@
+#:kivy 1.0
+
+<VistaManager>:
+    id:view
+    ParamDatos:
+        id:param
+        name:'parametros'
+    ModeloEntrada:
+        id:modelIn
+        name:'modelo'
+
+<ParamDatos>:
+    BoxLayout:
+        orientation:'vertical'
+        spacing:50
+        padding:20
+        canvas:
+            Color:
+                rgb:.57,.68, .90
+            Rectangle:
+                size:self.size
+                pos:self.pos
+        PersonLabel:
+            text:'Metodo Simplex'
+        GridLayout:
+            cols:2
+            spacing:20
+            PersonLabel:
+                text:'Numero de Variables: '
+            PersonTextIn:
+                id:NumVar
+            PersonLabel:
+                text:'N° de Restricciones: '
+            PersonTextIn:
+                id:NumRes
+        Button:
+            id:btnParam
+            text:'Siguiente'
+
+<ModeloEntrada>:
+    BoxLayout:#contenedor principal
+        orientation:'vertical'
+        Label:
+            text:'Modelo Simplex'
+            size_hint_y:None
+            height:150
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint_y:None
+            height:50
+            spacing:50
+            Label:
+                size_hint_x:None
+                width:15
+                text:'Z='
+            ScrollView:
+                BoxLayout:
+                    size_hint_x:None
+                    width:350
+                    id:func_z
+            Spinner:
+                id:spitipo
+                size_hint_y:None
+                height:50
+                text:'Maximizar'
+                values:['Maximizar','Minimizar']
+
+        GridLayout:
+            id:contpa
+            cols:3
+            ScrollView:
+                GridLayout:
+                    id:restric
+                    size_hint_y:None
+                    row_default_height:contpa.height*0.2
+                    height:self.minimum_height
+            ScrollView:
+                GridLayout:
+                    id:desi
+                    cols:1
+                    size_hint_y:None
+                    row_default_height:contpa.height*0.20
+                    height:self.minimum_height
+                    
+            ScrollView:     
+                GridLayout:
+                    id:bi
+                    cols:1
+                    size_hint_y:None
+                    row_default_height:contpa.height*0.20
+                    height:self.minimum_height
+
+        BoxLayout:
+            Button:
+                id:btn_return
+                text:'Atras'
+            Button:
+                id:btn_res
+                text:'Resolver'
+        
+
+<PersonLabel@Label>:
+    color:0.20,0.03,0.05,1
+    size_hint:1,None
+    height:100
+
+<PersonTextIn@TextInput>:
+    size_hint:1,None
+    height:50
+    input_filter:'int'
+        
+            
+
+        
