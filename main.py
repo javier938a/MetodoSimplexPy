@@ -5,8 +5,8 @@ kivy.require('1.0.6')
 from kivy.app import App
 from kivy.config import Config
 
-Config.set('graphics', 'width', 640)
-Config.set('graphics', 'height', 740)
+Config.set('graphics', 'width', 720)
+Config.set('graphics', 'height', 1520)
 from kivy.lang.builder import Builder
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
@@ -18,6 +18,7 @@ from kivy.properties import NumericProperty, ListProperty, DictProperty
 from MatrizIden import IdentidadPlan
 import sympy as sp
 import numpy as np
+from kivy.uix.screenmanager import FadeTransition
 
 Builder.load_file('./filekv/simplex.kv')
 
@@ -29,16 +30,23 @@ class ParamDatos(Screen):
 class ModeloEntrada(Screen):
     pass
 
+class VistaIteraciones(Screen):
+    pass
+
 
 class VistaManager(ScreenManager):
     NumVar = NumericProperty(0)
     NumRes = NumericProperty(0)
     ModelInter = DictProperty({})
     ModelData = DictProperty({})
+    MatrizIteraciones=ListProperty([])
+    solucion=ListProperty([])
+
     M = sp.Symbol('M')
 
     def __init__(self, **kwargs):
         super(VistaManager, self).__init__(**kwargs)
+        self.transition=FadeTransition()
         self.ModeloIterUno=None
         self.ModeloIterDos=None
         self.EncaLate=None
@@ -49,9 +57,13 @@ class VistaManager(ScreenManager):
         # Elemento se generaran de forma dinamica
         self.ids['modelIn'].ids['btn_res'].bind(on_press=self.resolver_model)
         self.ids['modelIn'].ids['btn_return'].bind(on_press=self.regresar_in)
+        self.ids['ViewIter'].ids['btn_return_model'].bind(on_press=self.regresar_model)
 
     def regresar_in(self, pos):
         self.ids['modelIn'].manager.current = 'parametros'
+
+    def regresar_model(self, pos):
+        self.ids['ViewIter'].manager.current='modelo'
 
     def resolver_model(self, pos):
         vectz = self.ModelInter['txtvectz']
@@ -106,11 +118,21 @@ class VistaManager(ScreenManager):
 
         if self.ModeloIterDos is None:#Se verifica hubo una segunda iteracion que es la de sumar las m y ontener una solucion inicial
             self.ModeloIterDos=self.ModeloIterUno#ya que si no hay para seguir trabajando solo con una matriz se igualara la matriz iter dos con la uno para
-        print(self.ModeloIterUno)
-        print(self.ModeloIterDos)
+        #print(self.ModeloIterUno)
+        #print(self.ModeloIterDos)
 
         print('Este es el tipo: '+self.ids['modelIn'].ids['spitipo'].text)
-        Op.Iteraciones(self.ModeloIterDos, self.ids['modelIn'].ids['spitipo'].text)
+        resultados = Op.Iteraciones(self.ModeloIterDos, self.ModeloIterUno, self.ids['modelIn'].ids['spitipo'].text, self.EncaTop, self.EncaLate)
+        self.MatrizIteraciones=resultados.get('MatrizIteraciones')
+        self.solucion=resultados.get('Soluciones')
+
+        #print(self.MatrizIteraciones)
+
+        self.ids['ViewIter'].manager.current='view' #Pasando a la siguiente pantalla
+
+        self.ids['ViewIter'].ids['tabla_desig'].cols=len(self.EncaTop)
+        self.ids['ViewIter'].ids['tabla_data'].data=self.MatrizIteraciones
+        self.ids['ViewIter'].ids['solucion'].data=self.solucion
 
 
 
@@ -129,7 +151,7 @@ class VistaManager(ScreenManager):
         # Creando la funcion Z
         vectz = []
         for i in range(self.NumVar):
-            vectz.append(TextInput(multiline=False))
+            vectz.append(TextInput(multiline=False, input_filter='float'))
         sub = 0
         for i in vectz:
             sub = sub + 1
@@ -150,7 +172,7 @@ class VistaManager(ScreenManager):
         for i in range(self.NumRes):
             listaRestric = []
             for j in range(self.NumVar):
-                listaRestric.append(TextInput(multiline=False))
+                listaRestric.append(TextInput(multiline=False, input_filter='float'))
             modelData.append(listaRestric)
 
         sub = 0
@@ -180,7 +202,7 @@ class VistaManager(ScreenManager):
 
         vectBi = []
         for i in range(self.NumRes):
-            vectBi.append(TextInput(multiline=False))
+            vectBi.append(TextInput(multiline=False, input_filter='float'))
 
         for i in vectBi:
             self.ids['modelIn'].ids['bi'].add_widget(i)

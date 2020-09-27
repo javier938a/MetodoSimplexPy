@@ -3,6 +3,7 @@ from sympy import Rational
 from sympy import Symbol
 from sympy import sympify
 from sympy import N
+from fractions import  Fraction
 
 
 class IdentidadPlan:
@@ -31,7 +32,7 @@ class IdentidadPlan:
         for fila in MatrizRestricMasZ:
             line = []
             for elem in fila:
-                line.append(sympify(elem))
+                line.append(sympify(str(Fraction(elem))))
             MatrizRestBiListSym.append(line)
         MatrizRestBiSymNp = np.array(MatrizRestBiListSym)
         return MatrizRestBiSymNp
@@ -169,7 +170,7 @@ class IdentidadPlan:
         return component_matrix
 
     def EncabezadoTop(self, enca, NunVar):
-        Variables=['R/A']
+        Variables=['VB']
         for x in range(NunVar):
             Variables.append(('X' + str(x + 1)))
         Variables.extend(enca)
@@ -214,9 +215,49 @@ class IdentidadPlan:
 
         return None
 
-    def Iteraciones(self, matrizIter, tipo):
-        MatrizModelo=matrizIter.copy()
+    def Iteraciones(self, matrizIter2, matrizIter1, tipo, encaTop, encaLate):
+        MatrizModelo=matrizIter2.copy()
+        MatrizModelo1=matrizIter1.copy()
+        enca_top=encaTop.copy()
+        enca_late=encaLate.copy()
+        print(enca_top)
+        print(enca_late)
         vectz=MatrizModelo[len(MatrizModelo)-1, :]#Vector >
+        MatrizIteraciones = []
+        print("chabadabadaba....")
+        print((MatrizModelo1==MatrizModelo).all())
+        if (matrizIter1==MatrizModelo).all()==False:#si la primera matriz es diferente de la segunda matriz significa que se sumaron las M y hay que presentar la planteada antes de la segunda que es la suma
+            matriz_enca_late=np.insert(MatrizModelo1, 0, enca_late, axis=1)
+            matriz_enca_latetop=np.insert(matriz_enca_late, 0, enca_top, axis=0)
+            for i in range(len(matriz_enca_latetop)):
+                for j in range(len(matriz_enca_latetop[0])):
+                    if i==0 or j==0:
+                        MatrizIteraciones.append({'text':str(matriz_enca_latetop[i][j]).replace('*',''), 'size_hint_y':None, 'height':30,
+                                              'bcolor':(0.42, 0.45, 0.0079, 1)})
+                    else:
+                        MatrizIteraciones.append(
+                            {'text': str(matriz_enca_latetop[i][j]).replace('*', ''), 'size_hint_y': None, 'height': 30,
+                             'bcolor': (.06, .25, .50, 1)})
+
+
+
+        matriz_enca_late=np.insert(MatrizModelo,0,enca_late, axis=1 )
+        matriz_enca_latetop=np.insert(matriz_enca_late, 0, enca_top, axis=0)
+        for i in range(len(matriz_enca_latetop)):
+            for j in range(len(matriz_enca_latetop[0])):
+                if i==0 or j==0:
+                    MatrizIteraciones.append({'text': str(matriz_enca_latetop[i][j]).replace('*',''), 'size_hint_y': None, 'height': 30,
+                                          'bcolor': (0.42, 0.45, 0.0079, 1)})
+                else:
+                    MatrizIteraciones.append(
+                        {'text': str(matriz_enca_latetop[i][j]).replace('*', ''), 'size_hint_y': None, 'height': 30,
+                         'bcolor': (.06, .25, .50, 1)})
+
+
+
+        #MatrizIteraciones.append(matriz_enca_latetop)
+
+
 
         while self.verificar_nueva_iter(vectz, tipo):
             col_pv=self.col_pv(vectz, tipo)#Columna pivote
@@ -224,6 +265,7 @@ class IdentidadPlan:
             vect_col_pv=MatrizModelo[:,col_pv]#Vector columna pivote
             vect_col_bi=MatrizModelo[:,(len(MatrizModelo[0])-1)]#Vector Bi
             row_pv=self.row_pv(vect_col_pv, vect_col_bi)#Fila pivote
+            enca_late[row_pv]=enca_top[col_pv+1]
             print(row_pv)
             print('row pv'+str(row_pv))
 
@@ -234,10 +276,42 @@ class IdentidadPlan:
                 if i != row_pv:
                     MatrizModelo[i,:]=MatrizModelo[row_pv,:]*val_mult_row_pv*-1 + MatrizModelo[i,:]
 
-            print(MatrizModelo)
+            matriz_enca_late=np.insert(MatrizModelo,0, enca_late, axis=1)
+            matriz_enca_latetop=np.insert(matriz_enca_late, 0, enca_top, axis=0)
+            for i in range(len(matriz_enca_latetop)):
+                for j in range(len(matriz_enca_latetop[0])):
+                    if j==(col_pv+1) or i==(row_pv+1):
+                        MatrizIteraciones.append(
+                            {'text': str(matriz_enca_latetop[i][j]).replace('*', ''), 'size_hint_y': None, 'height': 30,
+                             'bcolor': (.07, .43, .17, 1)})
+                    elif j==0 or i==0:
+                        MatrizIteraciones.append({'text': str(matriz_enca_latetop[i][j]).replace('*',''), 'size_hint_y': None, 'height': 30,
+                                              'bcolor': (0.42, 0.45, 0.0079, 1)})
+                    else:
+                        MatrizIteraciones.append(
+                            {'text': str(matriz_enca_latetop[i][j]).replace('*', ''), 'size_hint_y': None, 'height': 30,
+                             'bcolor': (.06,.25,.50,1)})
+
+        Solu=MatrizModelo[:,(len(MatrizModelo[0])-1)]
+        soluciones=[]
+        soluciones.append({'text':'Soluciones:'})
+        for i in range(len(Solu)):
+            soluciones.append({'text':(str(enca_late[i])+' = '+str(Solu[i]).replace('*',''))})
+
+        if str(Solu[len(Solu)-1]).find('M')>=0:
+            soluciones.append(({'text':'No tiene\nSolucion.'}))
+
+        resultados={'MatrizIteraciones':MatrizIteraciones, 'Soluciones':soluciones}
+        print(soluciones)
 
 
-        print("Llego aqui!! todo esta bien")
+
+
+
+
+
+
+        return resultados
 
     def col_pv(self, vectz, tipo):
         pos=0

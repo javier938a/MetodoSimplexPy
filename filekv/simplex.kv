@@ -2,12 +2,16 @@
 
 <VistaManager>:
     id:view
+    spacing:50
     ParamDatos:
         id:param
         name:'parametros'
     ModeloEntrada:
         id:modelIn
         name:'modelo'
+    VistaIteraciones:
+        id:ViewIter
+        name:'view'
 
 <ParamDatos>:
     BoxLayout:
@@ -39,7 +43,14 @@
 
 <ModeloEntrada>:
     BoxLayout:#contenedor principal
+        spacing:15
         orientation:'vertical'
+        canvas:
+            Color:
+                rgba:0.55,0.21,0.019, 1
+            Rectangle:
+                size:self.size
+                pos:self.pos
         Label:
             text:'Modelo Simplex'
             size_hint_y:None
@@ -55,10 +66,12 @@
                 text:'Z='
             ScrollView:
                 BoxLayout:
-                    size_hint_x:None
-                    width:350
+                    size_hint:(None, 1)
+                    width:500
                     id:func_z
             Spinner:
+                size_hint:(None,1)
+                width:150
                 id:spitipo
                 size_hint_y:None
                 height:50
@@ -68,36 +81,122 @@
         GridLayout:
             id:contpa
             cols:3
+            spacing:10
             ScrollView:
                 GridLayout:
                     id:restric
+                    default_size:(None, None)
+                    default_size_hint:(None,None)
                     size_hint_y:None
-                    row_default_height:contpa.height*0.2
+                    size_hint_x:None
+                    col_default_width:100
+                    col_force_default:True
+                    row_default_height:contpa.height*0.10
                     height:self.minimum_height
+                    width:self.minimum_width
             ScrollView:
+                size_hint:(None,1)
+                width:100
                 GridLayout:
                     id:desi
                     cols:1
+                    default_size:(None, None)
+                    default_size_hint:(None,None)
                     size_hint_y:None
-                    row_default_height:contpa.height*0.20
+                    size_hint_x:None
+                    col_default_width:100
+                    col_force_default:True
+                    row_default_height:contpa.height*0.10
                     height:self.minimum_height
+                    width:self.minimum_width
+
                     
-            ScrollView:     
+            ScrollView:
+                size_hint:(None,1)
+                width:125
                 GridLayout:
                     id:bi
                     cols:1
                     size_hint_y:None
-                    row_default_height:contpa.height*0.20
+                    size_hint_x:None
+                    row_default_height:contpa.height*0.10
+                    col_default_width:100
+                    col_force_default:True
                     height:self.minimum_height
+                    width:self.minimum_width
 
         BoxLayout:
+            size_hint:(1,None)
+            height:125
             Button:
+                size_hint:(1,None)
+                height:100
                 id:btn_return
                 text:'Atras'
             Button:
+                size_hint:(1,None)
+                height:100
                 id:btn_res
                 text:'Resolver'
+
+<VistaIteraciones>:
+    id:viewIter
+    BoxLayout:
+        canvas:
+            Color:
+                rgba:0.54, 0.27, 0.0745, 1
+            Rectangle:
+                size:self.size
+                pos:self.pos
+        orientation:'vertical'
+        Label:
+            text:'Iteraciones'
+            size_hint:(1,None)
+            height:100
+        RecycleView:
+            viewclass:'CustomLabel'
+            id:tabla_data
+            RecycleGridLayout:
+                id:tabla_desig
+                cols:5
+                default_size:(None,250)
+                default_size_hint:(None,None)
+                size_hint_y:None
+                size_hint_x:None
+                col_default_width:100
+                col_force_default:True
+                height: self.minimum_height
+                width:self.minimum_width
+                spacing:5
+        RecycleView:
+            id:solucion
+            size_hint:(1,None)
+            height:100
+            viewclass:'Label'
+            RecycleBoxLayout:
+                id:desigSol
+                default_size:dp(100), None
+                default_size_hint:None,1
+                size_hint:(None,1)
+                size_hint_x:None
+                width: self.minimum_width
+
+        Button:
+            id:btn_return_model
+            size_hint:(1, None)
+            height:100
+            text:'Regresar'
+
         
+
+<CustomLabel@Label>:
+    bcolor:(1,1,1,1)
+    canvas.before:
+        Color:
+            rgba:root.bcolor
+        Rectangle:
+            size:self.size
+            pos:self.pos
 
 <PersonLabel@Label>:
     color:0.20,0.03,0.05,1
